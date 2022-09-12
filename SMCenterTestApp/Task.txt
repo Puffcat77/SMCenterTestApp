@@ -1,0 +1,84 @@
+﻿Тестовое задание.
+
+EntityFramework в качестве ORM
+
+Сделать asp.net web api 2 контроллера для редактирования таблиц пациентов и врачей.
+Контрлллер должен поддерживать операции:
+-Добавление записи
+-Редактирование записи
+-Удаление записи
+-Получения списка записей для формы списка с поддержкой сортировки и постраничного
+возврата данных (должна быть возможность через параметры указать по какому полю
+список должен быть отсортирован и так же через параметры указать какой фрагмент
+списка (страницу) необходимо вернуть)
+-Получение записи по ид для редактирования
+
+Объект, возвращаемый методом получения записи для редактирования и объекты,
+возвращаемые методом получения списка должны быть разными:
+объект для редактирования должен содержать только поля редактируемой таблицы и
+ссылки (id) связанных записей из других таблиц,
+объект списка не должен содержать внешних ссылок, вместо них необходимо
+возвращать значение из связанной таблицы (т.е. не id специализации врача, а название).
+Никаких лишних полей в объектах быть не должно.
+
+В качестве базы необходимо использовать MS SQL.
+Таблицы в базе:
+Участки (Region)
+- Номер (Number)
+Специализации (Speciality)
+- Название (Name)
+Кабинеты (Cabinet)
+-Номер (Number)
+Пациенты (Patient)
+-Фамилия (LastName)
+-Имя (FirstName)
+-Отчество (Surname)
+-Адрес (Address)
+-Дата рождения (BirthDate)
+-Пол (Sex)
+-Участок (ссылка) (RegionId)
+Врачи (Doctor)
+-ФИО (Initials)
+-Кабинет (ссылка) (CabinetId)
+-Специализация (ссылка) (SpecialityId)
+-Участок (для участковых врачей, ссылка) (RegionId)
+
+В бд:
+Region
+(
+	Id int primary key, 
+	Number int not null
+);
+
+create table Speciality
+(
+	Id int primary key,
+	Name nvarchar(200) not null
+);
+
+create table Cabinet
+(
+	Id int primary key, 
+	Number int not null
+);
+
+create table Patient
+(
+	Id uniqueidentifier primary key,
+	LastName nvarchar(50) not null,
+	FirstName nvarchar(50) not null,
+	SurName nvarchar(60) not null,
+	Address nvarchar(100) not null,
+	BirthDate datetime2 not null,
+	Sex bit not null,
+	RegionId int references Region(id) not null
+);
+
+create table Doctor
+(
+	Id uniqueidentifier primary key,
+	Initials nvarchar(200) not null,
+	CabinetId int references Cabinet(id) not null,
+	SpecialityId int references Speciality(Id) not null,
+	RegionId int references Region(Id) not null
+)
