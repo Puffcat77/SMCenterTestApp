@@ -1,6 +1,6 @@
-﻿namespace SMCenterTestApp.DTO
+﻿namespace SMCenterTestApp.DAL
 {
-    public class Cabinet
+    public partial class Cabinet
     {
         public int Id { get; set; }
         public int Number { get; set; }

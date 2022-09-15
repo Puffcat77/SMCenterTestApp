@@ -16,6 +16,6 @@
 
 		public bool Sex { get; set; }
 
-		public RegionDTO Region { get; set; }
+		public int RegionNumber { get; set; }
     }
 }
