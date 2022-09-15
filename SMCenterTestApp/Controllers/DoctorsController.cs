@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SMCenterTestApp.DAL;
 using SMCenterTestApp.DTO;
@@ -13,10 +8,17 @@ namespace SMCenterTestApp.Controllers
 {
     public class DoctorsController : Controller
     {
+        DoctorRepository doctorRepository;
+
+        public DoctorsController(MedicDBContext context)
+        {
+            doctorRepository = new DoctorRepository(context);
+        }
+
         // GET: Doctors
         public async Task<IActionResult> List()
         {
-            return View(new DoctorRepository().List());
+            return View(doctorRepository.List());
         }
 
         // GET: Doctors/Details/5
@@ -27,8 +29,7 @@ namespace SMCenterTestApp.Controllers
                 return NotFound();
             }
 
-            DoctorDTO? doctorDTO =
-                new DoctorRepository().GetById(id.Value);
+            DoctorDTO? doctorDTO = doctorRepository.GetById(id.Value);
             if (doctorDTO == null)
             {
                 return NotFound();
@@ -48,7 +49,7 @@ namespace SMCenterTestApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                new DoctorRepository().Add(doctor);
+                doctorRepository.Add(doctor);
                 return Ok();
             }
             throw new InvalidCastException();
@@ -57,8 +58,7 @@ namespace SMCenterTestApp.Controllers
         // GET: Doctors/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
-            DoctorDTO? doctorDTO =
-                new DoctorRepository().GetById(id.Value);
+            DoctorDTO? doctorDTO = doctorRepository.GetById(id.Value);
             if (doctorDTO == null)
             {
                 return NotFound();
@@ -84,13 +84,12 @@ namespace SMCenterTestApp.Controllers
             {
                 try
                 {
-                    new DoctorRepository().Edit(doctor);
+                    doctorRepository.Edit(doctor);
                     return Ok();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (new PatientRepository()
-                        .GetById(doctor.Id) == null)
+                    if (doctorRepository.GetById(doctor.Id) == null)
                     {
                         return NotFound();
                     }
@@ -111,9 +110,7 @@ namespace SMCenterTestApp.Controllers
                 return NotFound();
             }
 
-            DoctorRepository? repo = new DoctorRepository();
-
-            DoctorDTO? doctorDTO = repo.GetById(id.Value);
+            DoctorDTO? doctorDTO = doctorRepository.GetById(id.Value);
             if (doctorDTO == null)
             {
                 return NotFound();
@@ -127,14 +124,13 @@ namespace SMCenterTestApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            PatientRepository? repo = new PatientRepository();
-            PatientDTO? patientDTO = repo.GetById(id);
-            if (patientDTO == null)
+            DoctorDTO? doctorDTO = doctorRepository.GetById(id);
+            if (doctorDTO == null)
             {
                 return NotFound();
             }
 
-            repo.Remove(id);
+            doctorRepository.Remove(id);
 
             return Ok();
         }

@@ -7,6 +7,13 @@ namespace SMCenterTestApp.Repositories
 {
     public class PatientRepository
     {
+        MedicDBContext dbContext;
+
+        public PatientRepository(MedicDBContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
         public PatientEditDTO Add(PatientDTO patient)
         {
             if (patient == null)
@@ -14,39 +21,36 @@ namespace SMCenterTestApp.Repositories
                 return null;
             }
 
-            using (MedicDBContext db = new MedicDBContext())
+            RegionDTO? region
+                = new RegionRepository().Add(patient.RegionNumber);
+
+            Patient? patientDb = dbContext.Patients
+                .FirstOrDefault(p =>
+                    p.FirstName == patient.FirstName
+                    && p.LastName == patient.LastName
+                    && p.Surname == patient.Surname
+                    && p.Address == patient.Address
+                    && p.Sex == patient.Sex
+                    && p.BirthDate == patient.BirthDate
+                    && p.RegionId == region.Id);
+            if (patientDb == null)
             {
-                RegionDTO? region
-                    = new RegionRepository().Add(patient.RegionNumber);
-
-                Patient? patientDb = db.Patients
-                    .FirstOrDefault(p =>
-                        p.FirstName == patient.FirstName
-                        && p.LastName == patient.LastName
-                        && p.Surname == patient.Surname
-                        && p.Address == patient.Address
-                        && p.Sex == patient.Sex
-                        && p.BirthDate == patient.BirthDate
-                        && p.RegionId == region.Id);
-                if (patientDb == null)
+                patientDb = new Patient
                 {
-                    patientDb = new Patient
-                    {
-                        Id = Guid.NewGuid(),
-                        FirstName = patient.FirstName,
-                        LastName = patient.LastName,
-                        Surname = patient.Surname,
-                        Address = patient.Address,
-                        Sex = patient.Sex,
-                        BirthDate = patient.BirthDate,
-                        RegionId = region.Id
-                    };
-                    db.Patients.Add(patientDb);
-                    db.SaveChanges();
-                }
-
-                return new PatientAdapter().ToEditDTO(patientDb);
+                    Id = Guid.NewGuid(),
+                    FirstName = patient.FirstName,
+                    LastName = patient.LastName,
+                    Surname = patient.Surname,
+                    Address = patient.Address,
+                    Sex = patient.Sex,
+                    BirthDate = patient.BirthDate,
+                    RegionId = region.Id
+                };
+                dbContext.Patients.Add(patientDb);
+                dbContext.SaveChanges();
             }
+
+            return new PatientAdapter().ToEditDTO(patientDb);
         }
 
         public PatientDTO GetById(Guid? id)
@@ -55,79 +59,64 @@ namespace SMCenterTestApp.Repositories
             {
                 return null;
             }
-            using (MedicDBContext db = new MedicDBContext())
-            {
-                Patient patient = db.Patients
-                    .FirstOrDefault(p => p.Id == id.Value);
-                return new PatientAdapter().ToDTO(patient);
-            }
+            Patient patient = dbContext.Patients
+                .FirstOrDefault(p => p.Id == id.Value);
+            return new PatientAdapter().ToDTO(patient);
         }
 
         internal List<PatientDTO> List()
         {
             PatientAdapter? adapter = new PatientAdapter();
-            using (MedicDBContext db = new MedicDBContext())
-            {
-                return db.Patients
-                    .ToList()
-                    .Select(adapter.ToDTO)
-                    .ToList();
-            }
+            return dbContext.Patients
+                .ToList()
+                .Select(adapter.ToDTO)
+                .ToList();
         }
 
         internal PatientEditDTO Edit(PatientEditDTO patient)
         {
-            using (MedicDBContext db = new MedicDBContext())
+            Patient? patientDb = dbContext 
+                .Patients
+                .FirstOrDefault(p => p.Id == patient.Id);
+
+            if (patientDb == null)
             {
-                Patient? patientDb = db
-                    .Patients
-                    .FirstOrDefault(p => p.Id == patient.Id);
-
-                if (patientDb == null)
-                {
-                    throw new DbUpdateConcurrencyException();
-                }
-
-                patientDb.FirstName = patient.FirstName;
-                patientDb.LastName = patient.LastName;
-                patientDb.Surname = patient.Surname;
-                patientDb.Address = patient.Address;
-                patientDb.BirthDate = patient.BirthDate;
-                patientDb.Sex = patient.Sex;
-                patientDb.RegionId = patient.RegionId;
-
-                db.Patients.Attach(patientDb);
-                db.Entry(patientDb).State = EntityState.Modified;
-
-                db.SaveChanges();
-
-                return GetEditDTOById(patientDb.Id);
+                throw new DbUpdateConcurrencyException();
             }
+
+            patientDb.FirstName = patient.FirstName;
+            patientDb.LastName = patient.LastName;
+            patientDb.Surname = patient.Surname;
+            patientDb.Address = patient.Address;
+            patientDb.BirthDate = patient.BirthDate;
+            patientDb.Sex = patient.Sex;
+            patientDb.RegionId = patient.RegionId;
+
+            dbContext.Patients.Attach(patientDb);
+            dbContext.Entry(patientDb).State = EntityState.Modified;
+
+            dbContext.SaveChanges();
+
+            return GetEditDTOById(patientDb.Id);
         }
 
         public PatientEditDTO GetEditDTOById(Guid patientId)
         {
-            using (MedicDBContext db = new MedicDBContext())
-            {
-                return new PatientAdapter()
-                    .ToEditDTO(db.Patients
-                        .FirstOrDefault(p =>
-                            p.Id == patientId));
-            }
+            return new PatientAdapter()
+                .ToEditDTO(dbContext.Patients
+                    .FirstOrDefault(p =>
+                        p.Id == patientId));
         }
 
         public void Remove(Guid id)
         {
-            using (MedicDBContext db = new MedicDBContext())
+            Patient patientDb = dbContext.Patients
+                .FirstOrDefault(p => p.Id == id);
+            if (patientDb != null)
             {
-                Patient patientDb = db.Patients
-                    .FirstOrDefault(p => p.Id == id);
-                if (patientDb != null)
-                {
-                    db.Patients.Remove(patientDb);
+                dbContext.Patients.Remove(patientDb);
 
-                    db.SaveChanges();
-                }
+                dbContext.SaveChanges();
             }
         }
     }
