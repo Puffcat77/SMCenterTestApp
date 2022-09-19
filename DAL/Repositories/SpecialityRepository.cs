@@ -1,5 +1,6 @@
 ﻿using DAL.Adapters;
 using DTO;
+using Microsoft.EntityFrameworkCore;
 
 namespace DAL.Repositories
 {
@@ -12,9 +13,9 @@ namespace DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public SpecialityDTO Add(SpecialityDTO speciality)
+        public async Task<SpecialityDTO?> Add(SpecialityDTO speciality)
         {
-            SpecialityDTO? specialityDb = GetByName(speciality.Name);
+            SpecialityDTO? specialityDb = await GetByName(speciality.Name);
             if (specialityDb == null)
             {
                 dbContext.Specialities.Add(new Speciality
@@ -22,17 +23,17 @@ namespace DAL.Repositories
                     Name = speciality.Name
                 });
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
 
-                return GetByName(speciality.Name);
+                return await GetByName(speciality.Name);
             }
 
             return specialityDb;
         }
 
-        public SpecialityDTO Add(string specialityName)
+        public async Task<SpecialityDTO?> Add(string specialityName)
         {
-            SpecialityDTO? speciality = GetByName(specialityName);
+            SpecialityDTO? speciality = await GetByName(specialityName);
             if (speciality == null)
             {
                 dbContext.Specialities.Add(new Speciality
@@ -40,24 +41,24 @@ namespace DAL.Repositories
                     Name = specialityName
                 });
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
 
-                return GetByName(specialityName);
+                return await GetByName(specialityName);
             }
 
             return speciality;
         }
 
-        public SpecialityDTO GetByName(string specialityName)
+        public async Task<SpecialityDTO?> GetByName(string specialityName)
         {
-            return new SpecialityAdapter().ToDTO(dbContext.Specialities
-                .FirstOrDefault(s => s.Name == specialityName));
+            return new SpecialityAdapter().ToDTO(await dbContext.Specialities
+                .FirstOrDefaultAsync(s => s.Name == specialityName));
         }
 
-        public SpecialityDTO GetById(int specialityId)
+        public async Task<SpecialityDTO?> GetById(int specialityId)
         {
-            return new SpecialityAdapter().ToDTO(dbContext.Specialities
-                .FirstOrDefault(s => s.Id == specialityId));
+            return new SpecialityAdapter().ToDTO(await dbContext.Specialities
+                .FirstOrDefaultAsync(s => s.Id == specialityId));
         }
     }
 }

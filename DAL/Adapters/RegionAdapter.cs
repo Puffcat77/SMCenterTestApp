@@ -4,7 +4,7 @@ namespace DAL.Adapters
 {
     public class RegionAdapter
     {
-        public RegionDTO ToDTO(Region region)
+        public RegionDTO? ToDTO(Region? region)
         {
             if (region == null)
             {
@@ -17,7 +17,7 @@ namespace DAL.Adapters
             };
         }
 
-        public Region ToDAL(RegionDTO region)
+        public Region? ToDAL(RegionDTO? region)
         {
             if (region == null)
             {

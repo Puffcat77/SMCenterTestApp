@@ -5,14 +5,14 @@ namespace DAL.Adapters
 {
     public class PatientAdapter
     {
-        internal PatientDTO ToDTO(MedicDBContext dbContext, Patient? patient)
+        internal async Task<PatientDTO?> ToDTO(MedicDBContext dbContext, Patient? patient)
         {
             if (patient == null)
             {
                 return null;
             }
-            RegionDTO region 
-                = new RegionRepository(dbContext).GetById(patient.RegionId);
+            RegionDTO? region 
+                = await new RegionRepository(dbContext).GetById(patient.RegionId);
             return new PatientDTO
             {
                 Id = patient.Id,
@@ -26,14 +26,15 @@ namespace DAL.Adapters
             };
         }
 
-        internal PatientEditDTO ToEditDTO(MedicDBContext dbContext, Patient patient)
+        internal async Task<PatientEditDTO?> ToEditDTO(MedicDBContext dbContext,
+            Patient? patient)
         {
             if (patient == null)
             {
                 return null;
             }
-            RegionDTO region
-                = new RegionRepository(dbContext).GetById(patient.RegionId);
+            RegionDTO? region
+                = await new RegionRepository(dbContext).GetById(patient.RegionId);
             return new PatientEditDTO
             {
                 Id = patient.Id,
@@ -47,17 +48,18 @@ namespace DAL.Adapters
             };
         }
 
-        internal Patient ToDAL(MedicDBContext dbContext, PatientDTO patient)
+        internal async Task<Patient?> ToDAL(MedicDBContext dbContext,
+            PatientDTO? patient)
         {
             if (patient == null)
             {
                 return null;
             }
-            RegionDTO region
-                = new RegionRepository(dbContext).GetByNumber(patient.Region);
+            RegionDTO? region
+                = await new RegionRepository(dbContext).GetByNumber(patient.Region);
             if (region == null)
             {
-                region = new RegionRepository(dbContext).Add(patient.Region);
+                region = await new RegionRepository(dbContext).Add(patient.Region);
             }
             return new Patient
             {

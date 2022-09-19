@@ -28,8 +28,8 @@ namespace SMCenterTestApp.Controllers
                 throw new ArgumentException(LogConstants.LIST_PARAMETERS_NOT_SET);
             }
 
-            IEnumerable<DoctorDTO>? doctors
-                = doctorRepository.List();
+            IEnumerable<DoctorDTO?>? doctors
+                =  await doctorRepository.List();
 
             if (orderProperties.UseOrder)
             {
@@ -85,7 +85,7 @@ namespace SMCenterTestApp.Controllers
                 return NotFound(LogConstants.DOCTOR_ID_IS_NULL);
             }
 
-            DoctorDTO? doctorDTO = doctorRepository.GetById(id.Value);
+            DoctorDTO? doctorDTO = await doctorRepository.GetById(id.Value);
             if (doctorDTO == null)
             {
                 return NotFound(string.Format(LogConstants.DOCTOR_ID_NOT_IN_DB, id.Value));
@@ -102,7 +102,7 @@ namespace SMCenterTestApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                return new JsonResult(doctorRepository.Add(doctor));
+                return new JsonResult(await doctorRepository.Add(doctor));
             }
             throw new InvalidCastException(LogConstants.DOCTOR_CREATE_EXCEPTION);
         }
@@ -111,7 +111,7 @@ namespace SMCenterTestApp.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(Guid? id)
         {
-            DoctorDTO? doctorDTO = doctorRepository.GetById(id.Value);
+            DoctorDTO? doctorDTO = await doctorRepository.GetById(id.Value);
             if (doctorDTO == null)
             {
                 return NotFound(string.Format(LogConstants.DOCTOR_ID_NOT_IN_DB, id.Value));
@@ -128,11 +128,11 @@ namespace SMCenterTestApp.Controllers
                 try
                 {
                     doctor.Id = id;
-                    return new JsonResult(doctorRepository.Edit(doctor));
+                    return new JsonResult(await doctorRepository.Edit(doctor));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (doctorRepository.GetById(doctor.Id) == null)
+                    if (await doctorRepository.GetById(doctor.Id) == null)
                     {
                         return NotFound(LogConstants.DOCTOR_WAS_DELETED_WHILE_EDIT);
                     }
@@ -154,7 +154,7 @@ namespace SMCenterTestApp.Controllers
                 return NotFound(LogConstants.DOCTOR_ID_IS_NULL);
             }
 
-            DoctorDTO? doctorDTO = doctorRepository.GetById(id.Value);
+            DoctorDTO? doctorDTO = await doctorRepository.GetById(id.Value);
             if (doctorDTO == null)
             {
                 return NotFound(string.Format(LogConstants.DOCTOR_ID_NOT_IN_DB, id.Value));
@@ -167,7 +167,7 @@ namespace SMCenterTestApp.Controllers
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            DoctorDTO? doctorDTO = doctorRepository.GetById(id);
+            DoctorDTO? doctorDTO = await doctorRepository.GetById(id);
             if (doctorDTO == null)
             {
                 return NotFound(string.Format(LogConstants.DOCTOR_ID_NOT_IN_DB, id));

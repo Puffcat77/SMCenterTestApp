@@ -28,7 +28,7 @@ namespace SMCenterTestApp.Controllers
                 throw new ArgumentException("Не заданы параметры списка");
             }
 
-            IEnumerable<PatientDTO>? patients =
+            IEnumerable<PatientDTO?>? patients = await
                 patientRepository.List();
 
             if (orderProperties.UseOrder)
@@ -106,7 +106,7 @@ namespace SMCenterTestApp.Controllers
                 return NotFound(LogConstants.PATIENT_ID_IS_NULL);
             }
 
-            PatientDTO? patientDTO = patientRepository.GetById(id);
+            PatientDTO? patientDTO = await patientRepository.GetById(id);
             if (patientDTO == null)
             {
                 return NotFound(string.Format(LogConstants.PATIENT_ID_NOT_IN_DB, id));
@@ -130,7 +130,7 @@ namespace SMCenterTestApp.Controllers
         [HttpGet("edit/{id}")]
         public async Task<IActionResult> Edit(Guid? id)
         {
-            PatientDTO? patientDTO = patientRepository.GetById(id);
+            PatientDTO? patientDTO = await patientRepository.GetById(id);
             if (patientDTO == null)
             {
                 return NotFound(string.Format(LogConstants.PATIENT_ID_NOT_IN_DB, id));
@@ -173,7 +173,7 @@ namespace SMCenterTestApp.Controllers
                 return NotFound(LogConstants.PATIENT_ID_IS_NULL);
             }
 
-            PatientDTO? patientDTO = patientRepository.GetById(id);
+            PatientDTO? patientDTO = await patientRepository.GetById(id);
             if (patientDTO == null)
             {
                 return NotFound(string.Format(LogConstants.PATIENT_ID_NOT_IN_DB, id));
@@ -186,7 +186,7 @@ namespace SMCenterTestApp.Controllers
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            PatientDTO? patientDTO = patientRepository.GetById(id);
+            PatientDTO? patientDTO = await patientRepository.GetById(id);
             if (patientDTO == null)
             {
                 return NotFound(string.Format(LogConstants.PATIENT_ID_NOT_IN_DB, id));
@@ -194,7 +194,7 @@ namespace SMCenterTestApp.Controllers
 
             patientRepository.Remove(id);
 
-            return Ok();
+            return Ok(LogConstants.PATIENT_SUCCESSFULLY_DELETED);
         }
     }
 }

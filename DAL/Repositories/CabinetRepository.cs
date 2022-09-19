@@ -14,25 +14,25 @@ namespace DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public CabinetDTO Add(CabinetDTO cabinet)
+        public async Task<CabinetDTO?> Add(CabinetDTO cabinet)
         {
-            CabinetDTO dbCabinet = GetByNumber(cabinet.Number);
+            CabinetDTO? dbCabinet = await GetByNumber(cabinet.Number);
             if (dbCabinet == null)
             {
                 dbContext.Cabinets.Add(new Cabinet
                 {
                     Number = cabinet.Number
                 });
-                dbContext.SaveChanges();
-                return GetByNumber(cabinet.Number);
+                await dbContext.SaveChangesAsync();
+                return await GetByNumber(cabinet.Number);
             }
 
             return dbCabinet;
         }
 
-        public CabinetDTO Add(int cabinet)
+        public async Task<CabinetDTO?> Add(int cabinet)
         {
-            CabinetDTO dbCabinet = GetByNumber(cabinet);
+            CabinetDTO? dbCabinet = await GetByNumber(cabinet);
             if (dbCabinet == null)
             {
                 Cabinet? newCabinet = new Cabinet
@@ -40,33 +40,33 @@ namespace DAL.Repositories
                     Number = cabinet
                 };
                 dbContext.Cabinets.Add(newCabinet);
-                dbContext.SaveChanges();
-                return GetByNumber(cabinet);
+                await dbContext.SaveChangesAsync();
+                return await GetByNumber(cabinet);
             }
 
             return dbCabinet;
         }
 
-        public CabinetDTO GetById(int cabinetId)
+        public async Task<CabinetDTO?> GetById(int cabinetId)
         {
             return new CabinetAdapter()
-                .ToDTO(dbContext.Cabinets
-                    .FirstOrDefault(c =>
+                .ToDTO(await dbContext.Cabinets
+                    .FirstOrDefaultAsync(c =>
                         c.Id == cabinetId));
         }
 
-        public CabinetDTO GetByNumber(int cabinetNumber)
+        public async Task<CabinetDTO?> GetByNumber(int cabinetNumber)
         {
             return new CabinetAdapter()
-                .ToDTO(dbContext.Cabinets
-                    .FirstOrDefault(c =>
+                .ToDTO(await dbContext.Cabinets
+                    .FirstOrDefaultAsync(c =>
                         c.Number == cabinetNumber));
         }
 
-        public CabinetDTO Edit(CabinetDTO cabinet)
+        public async Task<CabinetDTO?> Edit(CabinetDTO cabinet)
         {
-            Cabinet? cabinetDb = dbContext.Cabinets
-                .FirstOrDefault(c => c.Id == cabinet.Id);
+            Cabinet? cabinetDb = await dbContext.Cabinets
+                .FirstOrDefaultAsync(c => c.Id == cabinet.Id);
             if (cabinet != null)
             {
                 cabinetDb.Number = cabinet.Number;
@@ -75,21 +75,21 @@ namespace DAL.Repositories
                 dbContext.Entry(cabinetDb).State =
                     EntityState.Modified;
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
             }
 
-            return GetById(cabinet.Id);
+            return await GetById(cabinet.Id);
         }
 
-        public void Remove(CabinetDTO cabinet)
+        public async void Remove(CabinetDTO cabinet)
         {
-            Cabinet cabinetDb = dbContext.Cabinets
-                .FirstOrDefault(c => c.Id == cabinet.Id);
+            Cabinet? cabinetDb = await dbContext.Cabinets
+                .FirstOrDefaultAsync(c => c.Id == cabinet.Id);
             if (cabinetDb != null)
             {
                 dbContext.Cabinets.Remove(cabinetDb);
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
             }
         }
     }

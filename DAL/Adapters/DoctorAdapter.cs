@@ -5,7 +5,7 @@ namespace DAL.Adapters
 {
     public class DoctorAdapter
     {
-        internal DoctorDTO ToDTO(MedicDBContext dbContext, Doctor doctorDb)
+        internal async Task<DoctorDTO?> ToDTO(MedicDBContext dbContext, Doctor? doctorDb)
         {
             if (doctorDb == null)
             {
@@ -16,16 +16,16 @@ namespace DAL.Adapters
             {
                 Id = doctorDb.Id,
                 Initials = doctorDb.Initials,
-                Speciality = new SpecialityRepository(dbContext)
-                    .GetById(doctorDb.SpecialityId).Name,
-                Region = new RegionRepository(dbContext)
-                    .GetById(doctorDb.RegionId).Number,
-                Cabinet = new CabinetRepository(dbContext)
-                    .GetById(doctorDb.CabinetId).Number,
+                Speciality = (await new SpecialityRepository(dbContext)
+                    .GetById(doctorDb.SpecialityId)).Name,
+                Region = (await new RegionRepository(dbContext)
+                    .GetById(doctorDb.RegionId)).Number,
+                Cabinet = (await new CabinetRepository(dbContext)
+                    .GetById(doctorDb.CabinetId)).Number,
             };
         }
 
-        internal DoctorEditDTO ToEditDTO(Doctor doctorDb)
+        internal DoctorEditDTO? ToEditDTO(Doctor? doctorDb)
         {
             if (doctorDb == null)
             {

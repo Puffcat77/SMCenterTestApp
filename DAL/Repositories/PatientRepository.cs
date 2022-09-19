@@ -13,7 +13,7 @@ namespace DAL.Repositories
             this.dbContext = dbContext;
         }
 
-        public PatientEditDTO Add(PatientDTO patient)
+        public async Task<PatientEditDTO?> Add(PatientDTO patient)
         {
             if (patient == null)
             {
@@ -21,7 +21,7 @@ namespace DAL.Repositories
             }
 
             RegionDTO? region
-                = new RegionRepository(dbContext).Add(patient.Region);
+                = await new RegionRepository(dbContext).Add(patient.Region);
 
             Patient? patientDb = dbContext.Patients
                 .FirstOrDefault(p =>
@@ -46,37 +46,38 @@ namespace DAL.Repositories
                     RegionId = region.Id
                 };
                 dbContext.Patients.Add(patientDb);
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
             }
 
-            return new PatientAdapter().ToEditDTO(dbContext, patientDb);
+            return await new PatientAdapter().ToEditDTO(dbContext, patientDb);
         }
 
-        public PatientDTO GetById(Guid? id)
+        public async Task<PatientDTO?> GetById(Guid? id)
         {
             if (id == null)
             {
                 return null;
             }
-            Patient patient = dbContext.Patients
-                .FirstOrDefault(p => p.Id == id.Value);
-            return new PatientAdapter().ToDTO(dbContext, patient);
+            Patient? patient = await dbContext.Patients
+                .FirstOrDefaultAsync(p => p.Id == id.Value);
+            return await new PatientAdapter().ToDTO(dbContext, patient);
         }
 
-        public List<PatientDTO> List()
+        public async Task<List<PatientDTO?>> List()
         {
             PatientAdapter? adapter = new PatientAdapter();
-            return dbContext.Patients
-                .ToList()
-                .Select(p => adapter.ToDTO(dbContext, p))
+            return (await dbContext.Patients
+                .ToListAsync())
+                .Select(async p => await adapter.ToDTO(dbContext, p))
+                .Select(t => t.Result)
                 .ToList();
         }
 
-        public PatientEditDTO Edit(PatientEditDTO patient)
+        public async Task<PatientEditDTO?> Edit(PatientEditDTO patient)
         {
-            Patient? patientDb = dbContext 
+            Patient? patientDb = await dbContext 
                 .Patients
-                .FirstOrDefault(p => p.Id == patient.Id);
+                .FirstOrDefaultAsync(p => p.Id == patient.Id);
 
             if (patientDb == null)
             {
@@ -94,28 +95,28 @@ namespace DAL.Repositories
             dbContext.Patients.Attach(patientDb);
             dbContext.Entry(patientDb).State = EntityState.Modified;
 
-            dbContext.SaveChanges();
+            await dbContext.SaveChangesAsync();
 
-            return GetEditDTOById(patientDb.Id);
+            return await GetEditDTOById(patientDb.Id);
         }
 
-        public PatientEditDTO GetEditDTOById(Guid patientId)
+        public async Task<PatientEditDTO?> GetEditDTOById(Guid patientId)
         {
-            return new PatientAdapter()
-                .ToEditDTO(dbContext, dbContext.Patients
-                    .FirstOrDefault(p =>
+            return await new PatientAdapter()
+                .ToEditDTO(dbContext, await dbContext.Patients
+                    .FirstOrDefaultAsync(p =>
                         p.Id == patientId));
         }
 
-        public void Remove(Guid id)
+        public async void Remove(Guid id)
         {
-            Patient patientDb = dbContext.Patients
-                .FirstOrDefault(p => p.Id == id);
+            Patient? patientDb = await dbContext.Patients
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (patientDb != null)
             {
                 dbContext.Patients.Remove(patientDb);
 
-                dbContext.SaveChanges();
+                await dbContext.SaveChangesAsync();
             }
         }
     }

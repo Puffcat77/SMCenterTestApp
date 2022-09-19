@@ -4,7 +4,7 @@ namespace DAL.Adapters
 {
     public class CabinetAdapter
     {
-        public Cabinet ToDAL(CabinetDTO cabinet)
+        public Cabinet? ToDAL(CabinetDTO? cabinet)
         {
             if (cabinet == null)
             {
@@ -16,7 +16,7 @@ namespace DAL.Adapters
             };
         }
 
-        public CabinetDTO ToDTO(Cabinet cabinet)
+        public CabinetDTO? ToDTO(Cabinet? cabinet)
         {
             if (cabinet == null)
             {

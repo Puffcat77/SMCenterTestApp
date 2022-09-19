@@ -4,7 +4,7 @@ namespace DAL.Adapters
 {
     public class SpecialityAdapter
     {
-        internal SpecialityDTO ToDTO(Speciality? speciality)
+        internal SpecialityDTO? ToDTO(Speciality? speciality)
         {
             if (speciality == null)
             {
