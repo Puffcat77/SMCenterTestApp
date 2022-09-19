@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SMCenterTestApp.Adapters;
-using SMCenterTestApp.DAL;
-using SMCenterTestApp.DTO;
+using DAL.Adapters;
+using DTO;
 
-namespace SMCenterTestApp.Repositories
+namespace DAL.Repositories
 {
     public class PatientRepository
     {
@@ -22,7 +21,7 @@ namespace SMCenterTestApp.Repositories
             }
 
             RegionDTO? region
-                = new RegionRepository().Add(patient.RegionNumber);
+                = new RegionRepository(dbContext).Add(patient.Region);
 
             Patient? patientDb = dbContext.Patients
                 .FirstOrDefault(p =>
@@ -50,7 +49,7 @@ namespace SMCenterTestApp.Repositories
                 dbContext.SaveChanges();
             }
 
-            return new PatientAdapter().ToEditDTO(patientDb);
+            return new PatientAdapter().ToEditDTO(dbContext, patientDb);
         }
 
         public PatientDTO GetById(Guid? id)
@@ -61,19 +60,19 @@ namespace SMCenterTestApp.Repositories
             }
             Patient patient = dbContext.Patients
                 .FirstOrDefault(p => p.Id == id.Value);
-            return new PatientAdapter().ToDTO(patient);
+            return new PatientAdapter().ToDTO(dbContext, patient);
         }
 
-        internal List<PatientDTO> List()
+        public List<PatientDTO> List()
         {
             PatientAdapter? adapter = new PatientAdapter();
             return dbContext.Patients
                 .ToList()
-                .Select(adapter.ToDTO)
+                .Select(p => adapter.ToDTO(dbContext, p))
                 .ToList();
         }
 
-        internal PatientEditDTO Edit(PatientEditDTO patient)
+        public PatientEditDTO Edit(PatientEditDTO patient)
         {
             Patient? patientDb = dbContext 
                 .Patients
@@ -84,13 +83,13 @@ namespace SMCenterTestApp.Repositories
                 throw new DbUpdateConcurrencyException();
             }
 
-            patientDb.FirstName = patient.FirstName;
-            patientDb.LastName = patient.LastName;
-            patientDb.Surname = patient.Surname;
-            patientDb.Address = patient.Address;
-            patientDb.BirthDate = patient.BirthDate;
-            patientDb.Sex = patient.Sex;
-            patientDb.RegionId = patient.RegionId;
+            patientDb.FirstName = patient.FirstName ?? patientDb.FirstName;
+            patientDb.LastName = patient.LastName ?? patientDb.LastName;
+            patientDb.Surname = patient.Surname ?? patientDb.Surname;
+            patientDb.Address = patient.Address ?? patientDb.Address;
+            patientDb.BirthDate = patient.BirthDate ?? patientDb.BirthDate;
+            patientDb.Sex = patient.Sex ?? patientDb.Sex;
+            patientDb.RegionId = patient.RegionId ?? patientDb.RegionId;
 
             dbContext.Patients.Attach(patientDb);
             dbContext.Entry(patientDb).State = EntityState.Modified;
@@ -103,7 +102,7 @@ namespace SMCenterTestApp.Repositories
         public PatientEditDTO GetEditDTOById(Guid patientId)
         {
             return new PatientAdapter()
-                .ToEditDTO(dbContext.Patients
+                .ToEditDTO(dbContext, dbContext.Patients
                     .FirstOrDefault(p =>
                         p.Id == patientId));
         }

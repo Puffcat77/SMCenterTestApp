@@ -1,4 +1,7 @@
-﻿namespace SMCenterTestApp.DAL
+﻿using System;
+using System.Collections.Generic;
+
+namespace DAL
 {
     public partial class Patient
     {

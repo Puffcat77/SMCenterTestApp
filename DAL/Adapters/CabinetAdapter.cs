@@ -1,7 +1,6 @@
-﻿using SMCenterTestApp.DAL;
-using SMCenterTestApp.DTO;
+﻿using DTO;
 
-namespace SMCenterTestApp.Adapters
+namespace DAL.Adapters
 {
     public class CabinetAdapter
     {

@@ -1,12 +1,11 @@
-﻿using SMCenterTestApp.DAL;
-using SMCenterTestApp.DTO;
-using SMCenterTestApp.Repositories;
+﻿using DAL.Repositories;
+using DTO;
 
-namespace SMCenterTestApp.Adapters
+namespace DAL.Adapters
 {
     public class DoctorAdapter
     {
-        internal DoctorDTO ToDTO(Doctor doctorDb)
+        internal DoctorDTO ToDTO(MedicDBContext dbContext, Doctor doctorDb)
         {
             if (doctorDb == null)
             {
@@ -17,11 +16,11 @@ namespace SMCenterTestApp.Adapters
             {
                 Id = doctorDb.Id,
                 Initials = doctorDb.Initials,
-                Speciality = new SpecialityRepository()
+                Speciality = new SpecialityRepository(dbContext)
                     .GetById(doctorDb.SpecialityId).Name,
-                Region = new RegionRepository()
+                Region = new RegionRepository(dbContext)
                     .GetById(doctorDb.RegionId).Number,
-                Cabinet = new CabinetRepository()
+                Cabinet = new CabinetRepository(dbContext)
                     .GetById(doctorDb.CabinetId).Number,
             };
         }

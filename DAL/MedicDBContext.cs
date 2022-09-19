@@ -1,6 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace SMCenterTestApp.DAL
+namespace DAL
 {
     public partial class MedicDBContext : DbContext
     {
@@ -23,7 +26,8 @@ namespace SMCenterTestApp.DAL
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Name=ConnectionStrings:MedicDB");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=MedicDB;Trusted_Connection=True;");
             }
         }
 
@@ -32,8 +36,6 @@ namespace SMCenterTestApp.DAL
             modelBuilder.Entity<Cabinet>(entity =>
             {
                 entity.ToTable("Cabinet");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
             });
 
             modelBuilder.Entity<Doctor>(entity =>
@@ -63,15 +65,11 @@ namespace SMCenterTestApp.DAL
             modelBuilder.Entity<Region>(entity =>
             {
                 entity.ToTable("Region");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
             });
 
             modelBuilder.Entity<Speciality>(entity =>
             {
                 entity.ToTable("Speciality");
-
-                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Name).HasMaxLength(200);
             });

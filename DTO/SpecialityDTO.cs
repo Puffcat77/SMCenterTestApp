@@ -1,4 +1,4 @@
-﻿namespace SMCenterTestApp.DTO
+﻿namespace DTO
 {
     public class SpecialityDTO
     {

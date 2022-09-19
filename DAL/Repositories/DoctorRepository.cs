@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SMCenterTestApp.Adapters;
-using SMCenterTestApp.DAL;
-using SMCenterTestApp.DTO;
+using DAL.Adapters;
+using DTO;
 
-namespace SMCenterTestApp.Repositories
+namespace DAL.Repositories
 {
     public class DoctorRepository
     {
@@ -17,11 +16,11 @@ namespace SMCenterTestApp.Repositories
         public DoctorEditDTO Add(DoctorDTO doctor)
         {
             CabinetDTO? cabinet
-                = new CabinetRepository().Add(doctor.Cabinet);
+                = new CabinetRepository(dbContext).Add(doctor.Cabinet);
             SpecialityDTO? speciality
-                = new SpecialityRepository().Add(doctor.Speciality);
+                = new SpecialityRepository(dbContext).Add(doctor.Speciality);
             RegionDTO? region
-                = new RegionRepository().Add(doctor.Region);
+                = new RegionRepository(dbContext).Add(doctor.Region);
 
             Doctor? doctorDb = dbContext.Doctors
                 .FirstOrDefault(d =>
@@ -49,7 +48,7 @@ namespace SMCenterTestApp.Repositories
         public DoctorDTO GetById(Guid doctorId)
         {
             return new DoctorAdapter()
-                .ToDTO(dbContext.Doctors
+                .ToDTO(dbContext, dbContext.Doctors
                     .FirstOrDefault(d =>
                         d.Id == doctorId));
         }
@@ -71,9 +70,10 @@ namespace SMCenterTestApp.Repositories
                 throw new DbUpdateConcurrencyException();
             }
 
-            doctorDb.RegionId = doctor.RegionId;
-            doctorDb.SpecialityId = doctor.SpecialityId;
-            doctorDb.CabinetId = doctor.CabinetId;
+            doctorDb.Initials = doctor.Initials ?? doctorDb.Initials;
+            doctorDb.RegionId = doctor.RegionId ?? doctorDb.RegionId;
+            doctorDb.SpecialityId = doctor.SpecialityId ?? doctorDb.RegionId;
+            doctorDb.CabinetId = doctor.CabinetId ?? doctorDb.RegionId;
 
             dbContext.Attach(doctorDb);
             dbContext.Entry(doctorDb).State = EntityState.Modified;
@@ -102,7 +102,7 @@ namespace SMCenterTestApp.Repositories
             DoctorAdapter? adapter = new DoctorAdapter();
             return dbContext.Doctors
                 .ToList()
-                .Select(adapter.ToDTO)
+                .Select(d => adapter.ToDTO(dbContext, d))
                 .ToList();
         }
     }

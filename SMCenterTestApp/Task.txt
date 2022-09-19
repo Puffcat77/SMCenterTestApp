@@ -68,7 +68,7 @@ create table Patient
 	Id uniqueidentifier primary key,
 	LastName nvarchar(50) not null,
 	FirstName nvarchar(50) not null,
-	SurName nvarchar(60) not null,
+	Surname nvarchar(60) not null,
 	Address nvarchar(100) not null,
 	BirthDate datetime2 not null,
 	Sex bit not null,
